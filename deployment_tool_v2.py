@@ -7,8 +7,8 @@ from utils import *
 
 
 
-### TODO Allow option to use a map file in string replace to replace view names while migrating incase view name conventions arent followed  
 ### TODO Decouple Code and create functions for repeating code
+### TODO Exception Handeling 
 
 
 

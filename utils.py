@@ -10,13 +10,40 @@ def get_credentials(filepath):
     f = open(filepath, 'r')
     answer = {}
     for line in f:
+        if line == "\n":
+            continue
         k, v = line.strip().split('=')
         answer[k.strip()] = v.strip()
     f.close()
     return answer
 
+# Function to populate lists with View names from the Map File     
+def get_map(filepath,textToSearch,textToReplace):
+    f = open(filepath, 'r')
+    
+    for line in f:
+        if line == "\n":
+            continue
+        k, v = line.strip().split(':')
+        if k.strip().lower()== "from":
+            continue
+        textToSearch.append(k.strip())
+        textToReplace.append(v.strip())
+    f.close()
+    return textToSearch,textToReplace
+
+
 # Function to get string inputs and replacement strings from user input and add to list
 def string_input(textToSearch,textToReplace):
+    while(True):
+        use_map = input("Use a map file?(Yes/No) :")
+        if use_map.lower() == "yes":
+            textToSearch,textToReplace = get_map("view_map.txt",textToSearch,textToReplace)
+            return
+        elif use_map.lower()  == "no":
+            break
+        else:
+            print("Enter Valid Input")
     while(True):
         print ("Enter '0' to exit from string replacement selector")
         x=input("Enter String to be Replaced: ")
