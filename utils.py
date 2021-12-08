@@ -3,6 +3,8 @@ import sys
 import fileinput
 import string
 import shutil
+import datetime
+
 
 
 # Function to get connection details from text file and create dictionary
@@ -86,8 +88,12 @@ def delete_folder_contents(folder):
 def backup_folder(destination_folder_no,client_id,client_secret,host):
     backup_flg = input("Do you want to Backup Destination Folder (Yes/No):")
     if backup_flg.lower() == "yes":
+        time = str(format(datetime.datetime.today().strftime('%Y-%m-%d-%H-%M-%S')))
+        os.mkdir("backup/{0}".format(time))
         print("Backing Up Destination Folder Data JSON")
-        os.system('gzr space export {0} --host {3}  --client_id={1} --client_secret={2} --port 443 --dir backup'.format(destination_folder_no,client_id,client_secret,host))
+        os.system('gzr space export {0} --host {3}  --client_id={1} --client_secret={2} --port 443 --dir backup/{4}'.format(destination_folder_no,client_id,client_secret,host,time))
+        filename = os.listdir("backup/{0}".format(time))[0]
+        os.rename("backup/{0}".format(time),"backup/{1}-{0}".format(time,filename))
         print("Finshed Backing Up Destination Folder Data JSON")
     elif backup_flg.lower() == "no":
         print("Not Backing Up Destination Folder")

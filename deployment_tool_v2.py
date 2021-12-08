@@ -76,6 +76,7 @@ while True:
         
         # Deploy Dashboards
         for dashboard_json in dashboard_json_names:
+            print("Importing:",dashboard_json)
             os.system('call gzr dashboard import "dash_json\{0}\{1}" {2} --host {5} --client_id={3} --client_secret={4} --port 443 --force'.format(dashboard_folder_name[0],dashboard_json,destination_folder_no,client_id,client_secret,host))
 
 
@@ -113,6 +114,7 @@ while True:
         
         # Deploy Dashboards
         for dashboard_json in dashboard_json_names:
+            print("Importing:",dashboard_json)
             os.system('call gzr dashboard import "dash_json\{0}" {1} --host {4} --client_id={2} --client_secret={3} --port 443 --force'.format(dashboard_json,destination_folder_no,client_id,client_secret,host))    
 
     # Exit Deployment Tool
