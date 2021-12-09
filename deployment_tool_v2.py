@@ -32,16 +32,17 @@ while True:
     print("""
     1) Folder Of Dashboard Deployment
     2) Dashboard Deployment 
-    3) Exit
+    3) Restore Backup
+    4) Exit
 
     """)
 
-    deployment_option=input("Enter Choice (1,2,3) :")
+    deployment_option=input("Enter Choice (1,2,3,4) :")
 
     if deployment_option == '1':
         source_folder_no = input("Enter Folder Number To Copy From:")
         # Export JSON of selected folder
-        os.system('gzr space export {0} --host {3}  --client_id={1} --client_secret={2} --port 443 --dir dash_json'.format(source_folder_no,client_id,client_secret,host))
+        os.system('gzr space export {0} --host {3}  --client_id={1} --client_secret={2} --port 443 --no-verify-ssl --dir dash_json'.format(source_folder_no,client_id,client_secret,host))
         print("Copied Folder Contents To JSON")
 
         # Get Folder Name and name of json files for each dashboard
@@ -77,7 +78,7 @@ while True:
         # Deploy Dashboards
         for dashboard_json in dashboard_json_names:
             print("Importing:",dashboard_json)
-            os.system('call gzr dashboard import "dash_json\{0}\{1}" {2} --host {5} --client_id={3} --client_secret={4} --port 443 --force'.format(dashboard_folder_name[0],dashboard_json,destination_folder_no,client_id,client_secret,host))
+            os.system('call gzr dashboard import "dash_json\{0}\{1}" {2} --host {5} --client_id={3} --client_secret={4} --port 443 --no-verify-ssl --force'.format(dashboard_folder_name[0],dashboard_json,destination_folder_no,client_id,client_secret,host))
 
 
     elif deployment_option == "2":
@@ -92,7 +93,7 @@ while True:
         
         # Get JSON for selected Dashboard ID's
         for dashboard_id in source_dashboard_list:
-            os.system('call gzr dashboard cat {0} --host {3}  --client_id={1} --client_secret={2} --port 443 --dir dash_json'.format(dashboard_id,client_id,client_secret,host))
+            os.system('call gzr dashboard cat {0} --host {3}  --client_id={1} --client_secret={2} --port 443 --no-verify-ssl --dir dash_json'.format(dashboard_id,client_id,client_secret,host))
         dashboard_json_names = os.listdir("dash_json")
         destination_folder_no = input("Enter Folder Number To Copy To:")
 
@@ -115,12 +116,16 @@ while True:
         # Deploy Dashboards
         for dashboard_json in dashboard_json_names:
             print("Importing:",dashboard_json)
-            os.system('call gzr dashboard import "dash_json\{0}" {1} --host {4} --client_id={2} --client_secret={3} --port 443 --force'.format(dashboard_json,destination_folder_no,client_id,client_secret,host))    
+            os.system('call gzr dashboard import "dash_json\{0}" {1} --host {4} --client_id={2} --client_secret={3} --port 443 --no-verify-ssl --force'.format(dashboard_json,destination_folder_no,client_id,client_secret,host))    
 
     # Exit Deployment Tool
     elif deployment_option == "3":
-        break
+        restore_backup(client_id,client_secret,host)
     
+
+    elif deployment_option == "4":
+        break
+
     else:
         print("Enter Valid Option")
    

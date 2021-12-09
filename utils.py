@@ -26,7 +26,7 @@ def get_map(filepath,textToSearch,textToReplace):
     for line in f:
         if line == "\n":
             continue
-        k, v = line.strip().split(':')
+        k, v = line.strip().split('=')
         if k.strip().lower()== "from":
             continue
         textToSearch.append(k.strip())
@@ -91,12 +91,55 @@ def backup_folder(destination_folder_no,client_id,client_secret,host):
         time = str(format(datetime.datetime.today().strftime('%Y-%m-%d-%H-%M-%S')))
         os.mkdir("backup/{0}".format(time))
         print("Backing Up Destination Folder Data JSON")
-        os.system('gzr space export {0} --host {3}  --client_id={1} --client_secret={2} --port 443 --dir backup/{4}'.format(destination_folder_no,client_id,client_secret,host,time))
-        filename = os.listdir("backup/{0}".format(time))[0]
-        os.rename("backup/{0}".format(time),"backup/{1}-{0}".format(time,filename))
+        os.system('gzr space export {0} --host {3}  --client_id={1} --client_secret={2} --port 443 --no-verify-ssl --dir backup/{4}'.format(destination_folder_no,client_id,client_secret,host,time))
+        foldername = os.listdir("backup/{0}".format(time))[0]
+        os.rename("backup/{0}".format(time),"backup/{1}-{0}".format(time,foldername))
+        files = os.listdir("backup/{1}-{0}/{1}".format(time,foldername))
+        for file in files:
+            file_name = os.path.join("backup/{1}-{0}/{1}".format(time,foldername), file)
+            shutil.move(file_name, "backup/{1}-{0}".format(time,foldername))
+            if "Space_" in file_name:
+                os.remove("backup/{1}-{0}/{2}".format(time,foldername,file))
+
+        os.rmdir("backup/{1}-{0}/{1}".format(time,foldername))
         print("Finshed Backing Up Destination Folder Data JSON")
     elif backup_flg.lower() == "no":
         print("Not Backing Up Destination Folder")
     
     else: 
         print("Invalid Input Not Backing Up Folder")
+
+
+def restore_backup(client_id,client_secret,host):
+    files = os.listdir("backup")
+    for i in range(0,len(files)):
+        print(i+1," : ",files[i])
+
+    while True:   
+        backup_folder_no = input("Input Number For the Backup file you would like to restore:")
+        if int(backup_folder_no)>len(files):
+            print("Enter Valid Number")
+            continue
+        confirm = input("Confirm selected folder {0} (yes/no) :".format(files[int(backup_folder_no)-1]))
+        if confirm.lower() == "yes":
+            break
+        else:
+            continue
+
+    backup_file = files[int(backup_folder_no)-1]
+
+    restore_backup_destination = input("Enter Folder Number you would like to restore the backup into :")
+
+    print("Restoring Backup Into Destination Folder {0}".format(restore_backup_destination))
+
+    backup_json_names = os.listdir("backup/{0}".format(backup_file))
+
+    for i in range (0 ,len(backup_json_names)):
+        if "Space_" in backup_json_names[i]:
+            del backup_json_names[i]
+
+    for backup_json in backup_json_names:
+        print("Importing:",backup_json)
+        os.system('call gzr dashboard import "backup\{0}\{1}" {2} --host {5} --client_id={3} --client_secret={4} --port 443 --no-verify-ssl --force'.format(backup_file,backup_json,restore_backup_destination,client_id,client_secret,host))
+
+
