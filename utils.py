@@ -1,3 +1,4 @@
+from multiprocessing.dummy import Array
 import os
 import sys 
 import fileinput
@@ -6,6 +7,30 @@ import shutil
 import datetime
 
 
+def space_export(source_folder_no,local_destination_folder,client_id,client_secret,host):
+    os.system('gzr space export {0} --host {1}  --client_id={2} --client_secret={3} --port 443 --no-verify-ssl --dir {4}'.format(source_folder_no,host,client_id,client_secret,local_destination_folder))
+
+def dashboard_import(json_location,destination_folder_id,host,client_id,client_secret):
+ os.system('call gzr dashboard import {0} {1} --host {2} --client_id={3} --client_secret={4} --port 443 --no-verify-ssl --force'.format(json_location,destination_folder_id,host,client_id,client_secret))
+
+def dashboard_cat(dashboard_id,host,client_id,client_secret,local_destination_folder):
+    os.system('call gzr dashboard cat {0} --host {1}  --client_id={2} --client_secret={3} --port 443 --no-verify-ssl --dir {4}'.format(dashboard_id,host,client_id,client_secret,local_destination_folder))
+
+
+def dashboard_json_files_from_folder(local_destination_folder):
+    dashboard_folder_name = os.listdir(local_destination_folder)
+    # Code to Prevent Copying a folder with a sub folder 
+    dashboard_json_names = os.listdir("{0}/{1}".format(local_destination_folder,dashboard_folder_name[0]))
+    for file in dashboard_json_names:
+        if not os.path.isfile(os.path.join("{0}/{1}".format(local_destination_folder,dashboard_folder_name[0]),file)):
+            print("Error More Than 1 Folder Exists. Exiting Code To prevent Wrong data being used")
+            sys.exit()    
+    
+    # Exclude JSON of Space (Folder)
+    for i in range (0 ,len(dashboard_json_names)):
+        if "Space_" in dashboard_json_names[i]:
+            del dashboard_json_names[i]
+    return dashboard_folder_name,dashboard_json_names
 
 # Function to get connection details from text file and create dictionary
 def get_credentials(filepath):
@@ -38,7 +63,7 @@ def get_map(filepath,textToSearch,textToReplace):
 # Function to get string inputs and replacement strings from user input and add to list
 def string_input(textToSearch,textToReplace):
     while(True):
-        use_map = input("Use a map file?(Yes/No) :")
+        use_map = input("Use a map file?(Yes/No):")
         if use_map.lower() == "yes":
             textToSearch,textToReplace = get_map("view_map.txt",textToSearch,textToReplace)
             return
@@ -91,7 +116,7 @@ def backup_folder(destination_folder_no,client_id,client_secret,host):
         time = str(format(datetime.datetime.today().strftime('%Y-%m-%d-%H-%M-%S')))
         os.mkdir("backup/{0}".format(time))
         print("Backing Up Destination Folder Data JSON")
-        os.system('gzr space export {0} --host {3}  --client_id={1} --client_secret={2} --port 443 --no-verify-ssl --dir backup/{4}'.format(destination_folder_no,client_id,client_secret,host,time))
+        space_export(destination_folder_no,'"backup/{0}"'.format(time),client_id,client_secret,host)
         foldername = os.listdir("backup/{0}".format(time))[0]
         os.rename("backup/{0}".format(time),"backup/{1}-{0}".format(time,foldername))
         files = os.listdir("backup/{1}-{0}/{1}".format(time,foldername))
@@ -128,7 +153,7 @@ def restore_backup(client_id,client_secret,host):
 
     backup_file = files[int(backup_folder_no)-1]
 
-    restore_backup_destination = input("Enter Folder Number you would like to restore the backup into :")
+    restore_backup_destination = input("Enter Folder Number you would like to restore the backup into:")
 
     print("Restoring Backup Into Destination Folder {0}".format(restore_backup_destination))
 
@@ -140,6 +165,5 @@ def restore_backup(client_id,client_secret,host):
 
     for backup_json in backup_json_names:
         print("Importing:",backup_json)
-        os.system('call gzr dashboard import "backup\{0}\{1}" {2} --host {5} --client_id={3} --client_secret={4} --port 443 --no-verify-ssl --force'.format(backup_file,backup_json,restore_backup_destination,client_id,client_secret,host))
-
-
+        dashboard_import('"backup\{0}\{1}"'.format(backup_file,backup_json),restore_backup_destination,host,client_id,client_secret)
+        
